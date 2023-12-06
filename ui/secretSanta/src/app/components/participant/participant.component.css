@@ -1,0 +1,79 @@
+/* Styles for the outer container */
+.outer-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vh;
+  background-color: transparent;
+  border-radius: 10px;
+}
+
+/* Styles for the inner container */
+.inner-container {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Styles for each form group */
+.form-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.form-label {
+  margin-right: 10px;
+}
+
+.form-input {
+  flex-grow: 1; /* Allows input to take up remaining space */
+}
+
+.btn {
+  padding: 5px 10px;
+  margin-top: 10px;
+}
+
+/* Existing styles... */
+
+/* Ensuring stepper content is centered */
+.mat-horizontal-stepper-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center children horizontally */
+  justify-content: center; /* Center children vertically */
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 10vh;
+}
+
+/* Styles for form fields to ensure centered and one per line */
+.mat-form-field {
+  width: 100%; /* Take full width of its container */
+  max-width: 400px; /* Maximum width */
+  margin: 15px auto; /* Centered horizontally with margin auto */
+  display: block; /* Ensure it's a block level element */
+}
+
+/* Center align the buttons */
+button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 15px;
+}
+
+/* Additional styles for the form inside the stepper */
+.stepper-form {
+  width: 100%; /* Full width of stepper content */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center form elements horizontally */
+}

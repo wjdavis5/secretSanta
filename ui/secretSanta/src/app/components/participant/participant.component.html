@@ -1,0 +1,63 @@
+<div class="outer-container">
+  <!-- Inner div with form and styling -->
+  <div class="inner-container">
+    <div *ngIf="participant">
+      <h3><button (click)="toggleSelf()">Click if this is you</button></h3>
+      <div *ngIf="!isSelf">
+        <app-wish-list
+          [eventId]="eventId"
+          [participantId]="participant.name"
+        ></app-wish-list>
+      </div>
+      <div *ngIf="isSelf">
+        <h2>Hello, {{ participant.name }}!</h2>
+        <h3 *ngIf="assignment">
+          <a [routerLink]="['/participant', eventId, assignment.name]">
+            Your assigned to: {{ assignment.name }}</a
+          >
+        </h3>
+        <!-- Password Prompt -->
+        <div>
+          <h3 *ngIf="!participant.passwordIsSet">Create a New Password</h3>
+          <h3 *ngIf="participant.passwordIsSet">Enter Your Password</h3>
+          <input
+            type="password"
+            [(ngModel)]="newPassword"
+            placeholder="Password"
+          />
+          <button *ngIf="!participant.passwordIsSet" (click)="updatePassword()">
+            Set Password
+          </button>
+          <button
+            *ngIf="participant.passwordIsSet && newPassword"
+            (click)="getParticipantAssignment()"
+          >
+            Show Assignment
+          </button>
+        </div>
+
+        <div *ngIf="participant.passwordIsSet">
+          <!-- Wish List -->
+          <h3>Wish List</h3>
+          <ul>
+            <li *ngFor="let item of participant.wishlist; let i = index">
+              {{ item.link }}
+              <button [disabled]="!newPassword" (click)="removeFromWishList(i)">
+                Remove
+              </button>
+            </li>
+          </ul>
+          <input
+            type="text"
+            [(ngModel)]="newWishListItem"
+            placeholder="Add new item"
+          />
+
+          <button [disabled]="!newPassword" (click)="addToWishList()">
+            Add to Wish List
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
