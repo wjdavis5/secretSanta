@@ -34,4 +34,4 @@ jobs:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         projectName: secretsanta
-        directory: ./deploy
+        directory: ./ui/secretSanta/deploy
