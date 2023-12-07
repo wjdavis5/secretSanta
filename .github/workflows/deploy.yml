@@ -26,7 +26,7 @@ jobs:
       working-directory: ./ui/secretSanta
 
     - name: Build Angular Project
-      run: npm run build -- --prod
+      run: npm run build -- --configuration=production --output-path ../../deploy
       working-directory: ./ui/secretSanta
 
     - name: Install Wrangler
