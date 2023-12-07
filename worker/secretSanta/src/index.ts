@@ -17,8 +17,9 @@ const app = new Hono<{ Bindings: Bindings }>();
 let ds: R2DataStore;
 
 app.use("*", cors());
-app.use("*", async (c) => {
+app.use("*", async (c,next) => {
   ds = new R2DataStore(c.env.SecretSantaBucket);
+  await next();
 });
 
 app.get("/api/secretSanta/:eventId", async (c) => {
@@ -108,24 +109,24 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
     });
   }
 
-  const assignmentObj = await ds.getParticipantAssignment(
+  let thisAssignment = await ds.getParticipantAssignment(
     eventId,
     participantName
   );
-  let thisAssignment: SecretSantaParticipant;
-  if (!assignmentObj) {
+  console.log(thisAssignment);
+  if (!thisAssignment) {
     const existingEvent = await ds.getEvent(eventId);
     const assignments = generateAssignments(existingEvent);
     console.log(assignments);
     for (const assignment of assignments) {
       if (assignment.participant.name === participantName) {
-        thisAssignment = assignment.assignment;
+        thisAssignment = assignment;
       }
       ds.createParticipantAssignment(eventId, assignment);
     }
   }
-  thisAssignment!.password = "";
-  return c.json(assignmentObj);
+  thisAssignment!.assignment.password = "";
+  return c.json(thisAssignment!.assignment);
 });
 
 /*Set password for a participant*/

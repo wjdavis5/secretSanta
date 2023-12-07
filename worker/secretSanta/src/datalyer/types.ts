@@ -74,6 +74,7 @@ export class R2DataStore implements DataStore {
     eventId: string,
     assignment: SecretSantaParticipantAssignment
   ): Promise<SecretSantaParticipantAssignment> {
+    console.log(`Creating assignment for ${assignment.participant.name}`);
     let result = await this.bucket.put(
       `${eventId}:${assignment.participant.name}:assignment`,
       JSON.stringify(assignment)
