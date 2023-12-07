@@ -74,4 +74,16 @@ export class SecretSantaService {
       }
     );
   }
+  login(eventId: string, participantId: string, participantPassword: string) {
+    return this.httpClient.post(
+      `${this.baseUrl}api/secretSanta/${eventId}/${participantId}/login`,
+      participantPassword,
+      {
+        headers: new HttpHeaders({
+          'x-participant-password': participantPassword,
+        }),
+        observe: 'response'
+      }
+    );
+  }
 }

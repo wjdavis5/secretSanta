@@ -2,9 +2,7 @@
 <div class="outer-container">
   <!-- Inner div with form and styling -->
   <div class="inner-container">
-    <div>
-      <a (click)="ToggleForm()">Toggle Form</a>
-    </div>
+
     <div id="regularForm" *ngIf="this.isNew() && this.form === -1">
       <form [formGroup]="eventNameFormGroup" class="regular-form">
 

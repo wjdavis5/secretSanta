@@ -1,15 +1,22 @@
 <div *ngIf="participant">
   <h2>{{ participant.name }}'s Wishlist</h2>
 
+  <div *ngIf="isAuthorized">
+    <input type="text" #wishlistItem placeholder="Add new item" />
+    <button (click)="addToWishList(wishlistItem)">Add to Wishlist</button>
+  </div>
+  <br />
   <table *ngIf="participant.wishlist && participant.wishlist.length > 0">
     <thead>
       <tr>
         <th>Wish List Item</th>
+        <th *ngIf="isAuthorized">Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let entry of participant.wishlist">
+      <tr *ngFor="let entry of participant.wishlist; let i = index">
         <td>{{ entry.link }}</td>
+        <td *ngIf="isAuthorized"><button (click)="removeFromWishList(i)">Remove</button></td>
       </tr>
     </tbody>
   </table>

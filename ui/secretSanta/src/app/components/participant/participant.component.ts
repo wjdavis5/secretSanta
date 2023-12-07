@@ -11,11 +11,12 @@ import { SecretSantaParticipant } from '../../../../../../worker/secretSanta/src
 export class ParticipantComponent {
   public participant!: SecretSantaParticipant;
   public eventId!: string;
-  public newPassword!: string;
+  public password!: string;
   public newWishListItem!: string;
   public disabledButton: boolean = true;
-  public assignment!: SecretSantaParticipant;
+  public assignment: SecretSantaParticipant | undefined;
   public isSelf: boolean = false;
+  public isAuthorized: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -54,7 +55,7 @@ export class ParticipantComponent {
       .updateParticipantWishList(
         this.eventId,
         this.participant.name,
-        this.newPassword,
+        this.password,
         this.participant.wishlist
       )
       .subscribe((participant) => {
@@ -68,7 +69,7 @@ export class ParticipantComponent {
       .updateParticipantWishList(
         this.eventId,
         this.participant.name,
-        this.newPassword,
+        this.password,
         this.participant.wishlist
       )
       .subscribe((participant) => {
@@ -82,7 +83,7 @@ export class ParticipantComponent {
       .updateParticipantPassword(
         this.eventId,
         this.participant.name,
-        this.newPassword
+        this.password
       )
       .subscribe((participant) => {
         console.log('password updated');
@@ -91,17 +92,36 @@ export class ParticipantComponent {
   }
 
   getParticipantAssignment() {
-    this.secretSantaService
-      .getParticipantAssignment(
-        this.eventId,
-        this.participant.name,
-        this.newPassword
-      )
-      .subscribe((participant) => {
-        this.assignment = participant;
-      });
+    if (!this.assignment) {
+      this.secretSantaService
+        .getParticipantAssignment(
+          this.eventId,
+          this.participant.name,
+          this.password
+        )
+        .subscribe((participant) => {
+          this.assignment = participant;
+        });
+    } else {
+      this.assignment = undefined;
+    }
   }
+
   toggleSelf() {
     this.isSelf = !this.isSelf;
+  }
+
+  login() {
+    this.secretSantaService
+      .login(this.eventId, this.participant.name, this.password)
+      .subscribe({
+        next: (response) => {
+          console.log(response);
+          this.isAuthorized = true;
+        },
+        error: (response) => {
+          this.isAuthorized = false;
+        },
+      });
   }
 }

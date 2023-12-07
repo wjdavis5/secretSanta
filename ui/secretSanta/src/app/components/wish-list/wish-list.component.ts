@@ -11,7 +11,9 @@ import { SecretSantaService } from '../../services/secret-santa.service';
 export class WishListComponent implements OnInit {
   @Input() eventId!: string;
   @Input() participantId!: string;
-  participant: SecretSantaParticipant | null = null;
+  @Input() isAuthorized!: boolean;
+  @Input() password!: string;
+  participant!: SecretSantaParticipant;
 
   constructor(
     private secretSantaService: SecretSantaService,
@@ -23,9 +25,48 @@ export class WishListComponent implements OnInit {
     const participantId = this.route.snapshot.paramMap.get('participantId');
 
     if (eventId && participantId) {
-      this.secretSantaService
-        .getParticipant(eventId, participantId)
-        .subscribe((participant) => (this.participant = participant));
+      this.getParticipant(eventId, participantId);
     }
+  }
+
+  addToWishList(item: any) {
+    this.participant!.wishlist.push({ link: item.value });
+    this.secretSantaService
+      .updateParticipantWishList(
+        this.eventId,
+        this.participant!.name,
+        this.password,
+        this.participant!.wishlist
+      )
+      .subscribe({
+        next: (participant) => {
+          console.log('wishlist updated');
+          this.getParticipant(this.eventId, this.participant!.name);
+          item.value = '';
+        },
+        error: (err) => {
+          console.error(err);
+        },
+      });
+  }
+  removeFromWishList(_t21: number) {
+    this.participant.wishlist.splice(_t21, 1);
+    this.secretSantaService
+      .updateParticipantWishList(
+        this.eventId,
+        this.participant.name,
+        this.password,
+        this.participant.wishlist
+      )
+      .subscribe((participant) => {
+        console.log('wishlist updated');
+        this.getParticipant(this.eventId, this.participant.name);
+      });
+  }
+
+  getParticipant(eventId: string, name: string) {
+    this.secretSantaService
+      .getParticipant(eventId, name)
+      .subscribe((participant) => (this.participant = participant));
   }
 }

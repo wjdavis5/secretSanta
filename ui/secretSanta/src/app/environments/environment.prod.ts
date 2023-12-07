@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://ssecretsanta.wjd5.workers.dev/',
-  uiUrl: 'https://ssecretsanta-9qb.pages.dev/'
+  apiUrl: 'https://secretsanta.wjd5.workers.dev/',
+  uiUrl: 'https://secretsanta-9qb.pages.dev/'
 }

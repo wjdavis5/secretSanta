@@ -1,14 +1,18 @@
 <div class="outer-container">
   <!-- Inner div with form and styling -->
   <div class="inner-container">
+    <div>
+      <a [routerLink]="['/main', eventId]"> Back to Event </a>
+    </div>
+    <div *ngIf="!isSelf">
+      <button (click)="toggleSelf()">This is me</button>
+    </div>
     <div *ngIf="participant">
-      <h3><button (click)="toggleSelf()">Click if this is you</button></h3>
-      <div *ngIf="!isSelf">
-        <app-wish-list
-          [eventId]="eventId"
-          [participantId]="participant.name"
-        ></app-wish-list>
-      </div>
+      <h3 *ngIf="!isAuthorized && participant.passwordIsSet && isSelf">
+        <input type="password" [(ngModel)]="password" placeholder="Password" />
+        <button (click)="login()">Login</button>
+      </h3>
+
       <div *ngIf="isSelf">
         <h2>Hello, {{ participant.name }}!</h2>
         <h3 *ngIf="assignment">
@@ -18,45 +22,33 @@
         </h3>
         <!-- Password Prompt -->
         <div>
-          <h3 *ngIf="!participant.passwordIsSet">Create a New Password</h3>
-          <h3 *ngIf="participant.passwordIsSet">Enter Your Password</h3>
-          <input
-            type="password"
-            [(ngModel)]="newPassword"
-            placeholder="Password"
-          />
-          <button *ngIf="!participant.passwordIsSet" (click)="updatePassword()">
-            Set Password
-          </button>
-          <button
-            *ngIf="participant.passwordIsSet && newPassword"
-            (click)="getParticipantAssignment()"
-          >
+          <div *ngIf="!participant.passwordIsSet">
+            <h3>Create a New Password</h3>
+
+            <input
+              type="password"
+              [(ngModel)]="password"
+              placeholder="Password"
+            />
+            <button
+              *ngIf="!participant.passwordIsSet"
+              (click)="updatePassword()"
+            >
+              Set Password
+            </button>
+          </div>
+          <button *ngIf="isAuthorized" (click)="getParticipantAssignment()">
             Show Assignment
           </button>
         </div>
-
-        <div *ngIf="participant.passwordIsSet">
-          <!-- Wish List -->
-          <h3>Wish List</h3>
-          <ul>
-            <li *ngFor="let item of participant.wishlist; let i = index">
-              {{ item.link }}
-              <button [disabled]="!newPassword" (click)="removeFromWishList(i)">
-                Remove
-              </button>
-            </li>
-          </ul>
-          <input
-            type="text"
-            [(ngModel)]="newWishListItem"
-            placeholder="Add new item"
-          />
-
-          <button [disabled]="!newPassword" (click)="addToWishList()">
-            Add to Wish List
-          </button>
-        </div>
+      </div>
+      <div>
+        <app-wish-list
+          [eventId]="eventId"
+          [participantId]="participant.name"
+          [isAuthorized]="isAuthorized"
+          [password]="password"
+        ></app-wish-list>
       </div>
     </div>
   </div>

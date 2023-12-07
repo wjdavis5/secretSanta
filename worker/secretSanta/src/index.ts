@@ -3,31 +3,37 @@ import { cors } from "hono/cors";
 import {
   SecretSantaEvent,
   SecretSantaParticipant,
+  SecretSantaParticipantAssignment,
   WishListEntry,
 } from "./types";
 import { generateAssignments } from "./methods";
+import { R2DataStore } from "./datalyer/types";
 
 type Bindings = {
-  SecretSanta: KVNamespace;
+  SecretSantaBucket: R2Bucket;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+let ds: R2DataStore;
 
 app.use("*", cors());
+app.use("*", async (c) => {
+  ds = new R2DataStore(c.env.SecretSantaBucket);
+});
+
 app.get("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
-  const existingEventRaw = await c.env.SecretSanta.get(eventId);
-  const existingEvent: SecretSantaEvent = JSON.parse(existingEventRaw!);
+  const existingEvent: SecretSantaEvent = await ds.getEvent(eventId);
   if (!existingEvent) {
     return new Response("Event not found", {
       status: 404,
     });
   }
   for (const participant of existingEvent.participants) {
-    const participantRaw = await c.env.SecretSanta.get(
-      `${eventId}:${participant.name}`
+    const participantObj: SecretSantaParticipant = await ds.getParticipant(
+      eventId,
+      participant.name
     );
-    const participantObj: SecretSantaParticipant = JSON.parse(participantRaw!);
     if (!participantObj) {
       return new Response("Participant not found", {
         status: 404,
@@ -44,23 +50,17 @@ app.get("/api/secretSanta/:eventId", async (c) => {
 app.post("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   console.log(`Creating event ${eventId}`);
-
   const eventObj: SecretSantaEvent = await c.req.json();
-  console.log(eventObj);
-
-  const existingEvent = await c.env.SecretSanta.get(eventId);
+  const existingEvent = await ds.getEvent(eventId);
   if (existingEvent) {
     return new Response("Cannot overwrite duplicate event", {
       status: 400,
     });
   }
-  await c.env.SecretSanta.put(eventId, JSON.stringify(eventObj));
+  await ds.createEvent(eventObj);
   for (const participant of eventObj.participants) {
     participant.password = "";
-    await c.env.SecretSanta.put(
-      `${eventId}:${participant.name}`,
-      JSON.stringify(participant)
-    );
+    await ds.createParticipant(eventId, participant);
   }
   return c.json(eventObj);
 });
@@ -73,16 +73,17 @@ app.post("/api/secretSanta/:eventId", async (c) => {
 app.get("/api/secretSanta/:eventId/:participantName", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
-  const participantRaw = await c.env.SecretSanta.get(
-    `${eventId}:${participantName}`
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+    eventId,
+    participantName
   );
-  const participantObj: SecretSantaParticipant = JSON.parse(participantRaw!);
   if (!participantObj) {
     return new Response("Participant not found", {
       status: 404,
     });
   }
   participantObj.password = "";
+  console.log(participantObj);
   return c.json(participantObj);
 });
 
@@ -92,10 +93,10 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
   const xParticipantPassword = c.req.header("x-participant-password");
-  const participantRaw = await c.env.SecretSanta.get(
-    `${eventId}:${participantName}`
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+    eventId,
+    participantName
   );
-  const participantObj: SecretSantaParticipant = JSON.parse(participantRaw!);
   if (!participantObj) {
     return new Response("Participant not found", {
       status: 404,
@@ -106,26 +107,24 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
       status: 401,
     });
   }
-  const assignmentRaw = await c.env.SecretSanta.get(
-    `${eventId}:${participantObj.name}:assignment`
+
+  const assignmentObj = await ds.getParticipantAssignment(
+    eventId,
+    participantName
   );
-  let assignmentObj: SecretSantaParticipant = JSON.parse(assignmentRaw!);
+  let thisAssignment: SecretSantaParticipant;
   if (!assignmentObj) {
-    const existingEventRaw = await c.env.SecretSanta.get(eventId);
-    const existingEvent: SecretSantaEvent = JSON.parse(existingEventRaw!);
+    const existingEvent = await ds.getEvent(eventId);
     const assignments = generateAssignments(existingEvent);
+    console.log(assignments);
     for (const assignment of assignments) {
       if (assignment.participant.name === participantName) {
-        assignmentObj = assignment.assignment;
+        thisAssignment = assignment.assignment;
       }
-      await c.env.SecretSanta.put(
-        `${eventId}:${participantName}:assignment`,
-        JSON.stringify(assignment.assignment)
-      );
-      return c.json(assignment.assignment);
+      ds.createParticipantAssignment(eventId, assignment);
     }
   }
-  assignmentObj.password = "";
+  thisAssignment!.password = "";
   return c.json(assignmentObj);
 });
 
@@ -133,12 +132,19 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
 app.put("/api/secretSanta/:eventId/:participantName/password", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
-  const participantRaw = await c.env.SecretSanta.get(
-    `${eventId}:${participantName}`
+  const password = await c.req.text();
+  if (password.length < 4) {
+    return new Response("Password must be at least 4 characters", {
+      status: 400,
+    });
+  }
+
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+    eventId,
+    participantName
   );
-  const participantObj: SecretSantaParticipant = JSON.parse(participantRaw!);
   if (!participantObj) {
-    return new Response("Participant not foundd", {
+    return new Response("Participant not found", {
       status: 404,
     });
   }
@@ -147,14 +153,35 @@ app.put("/api/secretSanta/:eventId/:participantName/password", async (c) => {
       status: 400,
     });
   }
-  participantObj.password = await c.req.text();
+  participantObj.password = password;
   participantObj.passwordIsSet = true;
-  c.env.SecretSanta.put(
-    `${eventId}:${participantName}`,
-    JSON.stringify(participantObj)
-  );
+  console.log(participantObj);
+  ds.createParticipant(eventId, participantObj);
+  console.log("password set");
   const res = { message: "Password set" };
   return c.json(res);
+});
+
+app.post("/api/secretSanta/:eventId/:participantName/login", async (c) => {
+  const eventId = c.req.param("eventId");
+  const participantName = c.req.param("participantName");
+
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId,participantName);
+
+  if (!participantObj) {
+    return new Response("Participant not foundd", {
+      status: 404,
+    });
+  }
+  const inputPassword = await c.req.text();
+  console.log(inputPassword);
+  console.log(participantObj.password);
+  if (participantObj.password !== inputPassword) {
+    return new Response("Incorrect password", {
+      status: 401,
+    });
+  }
+  return new Response("{}", { status: 200 });
 });
 
 /*Update wishlist for participant */
@@ -163,10 +190,8 @@ app.put("/api/secretSanta/:eventId/:participantName/wishList", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
   const xParticipantPassword = c.req.header("x-participant-password");
-  const participantRaw = await c.env.SecretSanta.get(
-    `${eventId}:${participantName}`
-  );
-  const participantObj: SecretSantaParticipant = JSON.parse(participantRaw!);
+  
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId,participantName);
 
   if (!participantObj) {
     return new Response("Participant not found", {
@@ -180,10 +205,7 @@ app.put("/api/secretSanta/:eventId/:participantName/wishList", async (c) => {
   }
   const wishlist: WishListEntry[] = await c.req.json();
   participantObj.wishlist = wishlist;
-  c.env.SecretSanta.put(
-    `${eventId}:${participantName}`,
-    JSON.stringify(participantObj)
-  );
+  await ds.createParticipant(eventId, participantObj);
   const res = { message: "Wishlist updated" };
   return c.json(res);
 });
