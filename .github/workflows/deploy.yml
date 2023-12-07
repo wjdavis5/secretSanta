@@ -16,7 +16,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'  # Set this to the Node version your project uses
+        node-version: '18'  # Set this to the Node version your project uses
 
     - name: Navigate to Angular Project Directory
       run: cd ui/secretSanta
