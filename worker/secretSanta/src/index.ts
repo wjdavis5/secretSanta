@@ -63,6 +63,11 @@ app.post("/api/secretSanta/:eventId", async (c) => {
     participant.password = "";
     await ds.createParticipant(eventId, participant);
   }
+  const assignments = generateAssignments(eventObj);
+    console.log(assignments);
+    for (const assignment of assignments) {
+      ds.createParticipantAssignment(eventId, assignment);
+    }
   return c.json(eventObj);
 });
 
@@ -115,15 +120,9 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
   );
   console.log(thisAssignment);
   if (!thisAssignment) {
-    const existingEvent = await ds.getEvent(eventId);
-    const assignments = generateAssignments(existingEvent);
-    console.log(assignments);
-    for (const assignment of assignments) {
-      if (assignment.participant.name === participantName) {
-        thisAssignment = assignment;
-      }
-      ds.createParticipantAssignment(eventId, assignment);
-    }
+    return new Response("Assignment not found", {
+      status: 404,
+    });
   }
   thisAssignment!.assignment.password = "";
   return c.json(thisAssignment!.assignment);

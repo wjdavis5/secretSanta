@@ -14,10 +14,11 @@ export function generateAssignments(
   console.log("Generating assignments");
   let participants = [...event.participants];
   let assignments: SecretSantaParticipantAssignment[] = [];
-  participants.sort(() => (Math.random() > 0.5 ? 1 : -1));
+  participants.sort(() => (Math.random() - 0.5));
   for (let i = 0; i < participants.length; i++) {
     const giver = participants[i];
-    const receiver = participants[(i + 1) % participants.length];
+    const next = participants.length-1 === i ? 0 : i+1;
+    const receiver = participants[next];
     assignments.push({ participant: giver, assignment: receiver });
   }
 
