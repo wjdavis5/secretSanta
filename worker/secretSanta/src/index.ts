@@ -17,7 +17,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 let ds: R2DataStore;
 
 app.use("*", cors());
-app.use("*", async (c,next) => {
+app.use("*", async (c, next) => {
   ds = new R2DataStore(c.env.SecretSantaBucket);
   await next();
 });
@@ -64,10 +64,10 @@ app.post("/api/secretSanta/:eventId", async (c) => {
     await ds.createParticipant(eventId, participant);
   }
   const assignments = generateAssignments(eventObj);
-    console.log(assignments);
-    for (const assignment of assignments) {
-      ds.createParticipantAssignment(eventId, assignment);
-    }
+  console.log(assignments);
+  for (const assignment of assignments) {
+    await ds.createParticipantAssignment(eventId, assignment);
+  }
   return c.json(eventObj);
 });
 
@@ -166,7 +166,7 @@ app.post("/api/secretSanta/:eventId/:participantName/login", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
 
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId,participantName);
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId, participantName);
 
   if (!participantObj) {
     return new Response("Participant not foundd", {
@@ -190,8 +190,8 @@ app.put("/api/secretSanta/:eventId/:participantName/wishList", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
   const xParticipantPassword = c.req.header("x-participant-password");
-  
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId,participantName);
+
+  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId, participantName);
 
   if (!participantObj) {
     return new Response("Participant not found", {
