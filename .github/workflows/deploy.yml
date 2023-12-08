@@ -3,7 +3,7 @@ name: Build and Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - master  # Set this to the branch you want to deploy from
+      - main  # Set this to the branch you want to deploy from
 
 jobs:
   deploy:
@@ -35,3 +35,4 @@ jobs:
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         projectName: secretsanta
         directory: ./ui/secretSanta/deploy/browser
+
