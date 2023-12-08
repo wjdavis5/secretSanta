@@ -156,7 +156,7 @@ app.put("/api/secretSanta/:eventId/:participantName/password", async (c) => {
   participantObj.password = password;
   participantObj.passwordIsSet = true;
   console.log(participantObj);
-  ds.createParticipant(eventId, participantObj);
+  await ds.createParticipant(eventId, participantObj);
   console.log("password set");
   const res = { message: "Password set" };
   return c.json(res);
