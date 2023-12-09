@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { FormGroup, FormBuilder, Validators, FormArray, FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NewIdService } from '../../services/new-id.service';
 import { SecretSantaService } from '../../services/secret-santa.service';
-import { SecretSantaEvent, SecretSantaParticipant } from '../../../../../../worker/secretSanta/src/types';
+import {
+  SecretSantaEvent,
+  SecretSantaParticipant,
+} from '../../../../../../worker/secretSanta/src/types';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -16,39 +19,30 @@ export class MainComponent implements OnInit {
   public newId: string | undefined;
   public qrCodeUrl: string | undefined;
   public loading: boolean = false;
-  public eventNameFormGroup: FormGroup;
-  public participantsFormGroup: FormGroup;
-  public eventDetailsFormGroup: FormGroup;
   public secretSantaFormGroup: FormGroup; // Single form group for the new form
   public participants: SecretSantaParticipant[] = [];
   public eventOwner: string = ''; // Store the selected event owner
   public event!: SecretSantaEvent;
-  public form: number = 1;
 
   constructor(
     private route: ActivatedRoute,
     private idService: NewIdService,
     private secretSantaService: SecretSantaService,
-    private _formBuilder: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
-    // Initialize form groups for both forms
-    this.eventNameFormGroup = this._formBuilder.group({
+    this.secretSantaFormGroup = this.fb.group({
       eventName: ['', Validators.required],
-    });
-    this.participantsFormGroup = this._formBuilder.group({
-      participantName: [''],
-      eventOwner: ['', Validators.required],
-    });
-    this.eventDetailsFormGroup = this._formBuilder.group({
+      participantName: ['', Validators.required],
+      participants: this.fb.array([]),
       eventDate: ['', Validators.required],
       eventLocation: ['', Validators.required],
       dollarLimit: ['', Validators.required],
     });
-    this.secretSantaFormGroup = this._formBuilder.group({
-      // All controls for the single form
-    });
   }
-
+  get participantsFormArray(): FormArray {
+    return this.secretSantaFormGroup.get('participants') as FormArray;
+  }
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const eventId = params.get('eventId');
@@ -71,19 +65,20 @@ export class MainComponent implements OnInit {
   }
 
   addParticipant(): void {
-    const participantName = this.participantsFormGroup.get('participantName')?.value;
-    if (participantName) {
-      this.participants.push({
-        name: participantName,
-        password: '',
-        passwordIsSet: false,
-        isOwner: (this.participantsFormGroup.get('eventOwner')?.value === participantName),
-        wishlist: []
-      });
-      this.participantsFormGroup.reset({
-        eventOwner: this.participantsFormGroup.get('eventOwner')?.value,
-      });
-    }
+    const participantName = this.secretSantaFormGroup.get('participantName')!.value;
+
+    const participantFormGroup = this.fb.group({
+      name: [participantName, Validators.required],
+      password: [''], // Add other necessary fields
+      passwordIsSet: [false],
+      isOwner: [false],
+      wishlist: [[]],
+    });
+    this.participantsFormArray.push(participantFormGroup);
+  }
+
+  removeParticipant(index: number): void {
+    this.participantsFormArray.removeAt(index);
   }
 
   submit(): void {
@@ -91,23 +86,32 @@ export class MainComponent implements OnInit {
     this.qrCodeUrl = `${environment.uiUrl}main/${this.newId}`;
     this.id = this.newId;
 
-    this.event = {
+    const formValue = this.secretSantaFormGroup.value;
+
+    const event = {
       id: this.newId,
-      eventName: this.eventNameFormGroup.get('eventName')?.value,
-      participants: this.participants,
-      eventDate: this.eventDetailsFormGroup.get('eventDate')?.value,
-      eventLocation: this.eventDetailsFormGroup.get('eventLocation')?.value,
-      dollarLimit: this.eventDetailsFormGroup.get('dollarLimit')?.value,
+      eventName: formValue.eventName,
+      participants: formValue.participants.map((participant: any) => ({
+        ...participant,
+        isOwner: participant.name === formValue.eventOwner,
+      })),
+      eventDate: formValue.eventDate,
+      eventLocation: formValue.eventLocation,
+      dollarLimit: formValue.dollarLimit,
       qrCodeUrl: this.qrCodeUrl,
-      eventOwnerName: this.participantsFormGroup.get('eventOwner')?.value,
+      eventOwnerName: formValue.eventOwner,
     };
 
-    this.secretSantaService.addEvent(this.event).subscribe((event) => {
-      console.log('Event Submitted:', this.event);
-    });
-  }
+    this.secretSantaService.addEvent(event).subscribe({
+      next: (event) => {
+        console.log('Event Submitted:', this.event);
+        this.router.navigate(['/main/' + event.id]);
+        this.event = event;
 
-  ToggleForm() {
-    this.form = this.form * -1;
+      },
+      error: (err) => {
+        console.error('Error:', err);
+      },
+    });
   }
 }

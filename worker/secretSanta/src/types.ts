@@ -9,6 +9,8 @@ export interface SecretSantaEvent {
   eventOwnerName: string;
 }
 
+
+
 export interface SecretSantaParticipant {
   name: string;
   isOwner: boolean;

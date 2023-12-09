@@ -2,46 +2,68 @@
 <div class="outer-container">
   <!-- Inner div with form and styling -->
   <div class="inner-container">
-
-    <div id="regularForm" *ngIf="this.isNew() && this.form === -1">
-      <form [formGroup]="eventNameFormGroup" class="regular-form">
-
-        <!-- Secret Santa Event Name -->
-        <h3>Event Name</h3>
-        <mat-form-field class="full-width">
+    <form *ngIf="isNew()" [formGroup]="secretSantaFormGroup" class="unified-form">
+      <!-- Event Name -->
+      <div class="form-section">
+        <mat-form-field style="width: 100%">
           <input
             matInput
-            placeholder="Secret Santa Event Name"
+            placeholder="Event Name"
             formControlName="eventName"
             required
           />
         </mat-form-field>
+      </div>
 
-        <!-- Add Participants -->
-        <h3>Add Participants</h3>
-        <mat-form-field class="full-width">
-          <input
-            matInput
-            placeholder="Participant's Name"
-            formControlName="participantName"
-          />
-        </mat-form-field>
-        <button mat-button (click)="addParticipant()">Add</button>
-
-        <!-- Displaying List of Participants with Owner Selection -->
-        <div *ngFor="let participant of participants; let i = index">
-          {{ participant.name }}
-          <mat-radio-group
-            aria-label="Select an owner"
-            formControlName="eventOwner"
+      <!-- Add Participant -->
+      <div class="form-section participant-section">
+        <div class="add-participant-input">
+          <mat-form-field class="full-width">
+            <input
+              matInput
+              placeholder="Participant's Name"
+              formControlName="participantName"
+            />
+          </mat-form-field>
+          <br />
+          <button
+            mat-raised-button
+            (click)="addParticipant()"
+            style="margin: 1vh"
+            color="accent"
           >
-            <mat-radio-button [value]="participant.name">Owner</mat-radio-button>
-          </mat-radio-group>
+            Add Participant
+          </button>
         </div>
+        <div class="participants-list">
+          <ul>
+            <li
+              *ngFor="
+                let participantFormGroup of participantsFormArray.controls;
+                let i = index
+              "
+            >
+              <div class="participant-item">
+                <span class="participant-name">{{
+                  participantFormGroup.get("name")!.value
+                }}</span>
+                <button
+                  mat-button
+                  (click)="removeParticipant(i)"
+                  class="remove-button"
+                  color="warn"
+                >
+                  Remove
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-        <!-- Event Details -->
-        <h3>Event Details</h3>
-        <mat-form-field class="full-width">
+      <!-- Event Details -->
+      <div class="form-section">
+        <mat-form-field style="width: 100%">
           <input
             matInput
             [matDatepicker]="picker"
@@ -55,8 +77,9 @@
           ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
-        <br />
-        <mat-form-field class="full-width">
+      </div>
+      <div class="form-section">
+        <mat-form-field style="width: 100%">
           <input
             matInput
             placeholder="Location of the Event"
@@ -64,8 +87,9 @@
             required
           />
         </mat-form-field>
-        <br />
-        <mat-form-field class="full-width">
+      </div>
+      <div class="form-section">
+        <mat-form-field style="width: 100%">
           <input
             matInput
             type="number"
@@ -74,160 +98,49 @@
             required
           />
         </mat-form-field>
+      </div>
 
-        <!-- Review and Submit -->
+      <!-- Review and Submit Section
+      <div class="form-section">
         <h3>Review Your Information:</h3>
         <p>
-          <b>Event Name:</b> {{ eventNameFormGroup.get('eventName')?.value }}
+          <b>Event Name:</b> {{ secretSantaFormGroup.get("eventName")?.value }}
         </p>
-        <p><b>Participants:</b> {{ participants | json }}</p>
+        <p>
+          <b>Participants:</b>
+          {{ secretSantaFormGroup.get("participants")?.value | json }}
+        </p>
         <p>
           <b>Date of Gift Exchange:</b>
-          {{ eventDetailsFormGroup.get('eventDate')?.value }}
+          {{ secretSantaFormGroup.get("eventDate")?.value }}
         </p>
         <p>
           <b>Location:</b>
-          {{ eventDetailsFormGroup.get('eventLocation')?.value }}
+          {{ secretSantaFormGroup.get("eventLocation")?.value }}
         </p>
         <p>
           <b>Dollar Limit:</b>
-          {{ eventDetailsFormGroup.get('dollarLimit')?.value }}
+          {{ secretSantaFormGroup.get("dollarLimit")?.value }}
         </p>
 
-        <button mat-button (click)="submit()">Submit</button>
-
-      </form>
-    </div>
-
-    <mat-horizontal-stepper [linear]="true" #stepper *ngIf="this.isNew() && this.form === 1">
-      <!-- Step 1: Secret Santa Event Name -->
-      <mat-step [stepControl]="eventNameFormGroup">
-        <form [formGroup]="eventNameFormGroup" class="stepper-form">
-          <ng-template matStepLabel>Event Name</ng-template>
-
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              placeholder="Secret Santa Event Name"
-              formControlName="eventName"
-              required
-            />
-          </mat-form-field>
-
-          <button mat-button matStepperNext>Next</button>
-        </form>
-      </mat-step>
-
-      <!-- Step 2: Add Participants -->
-      <mat-step [stepControl]="participantsFormGroup">
-        <form [formGroup]="participantsFormGroup" class="stepper-form">
-          <ng-template matStepLabel>Add Participants</ng-template>
-
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              placeholder="Participant's Name"
-              formControlName="participantName"
-            />
-          </mat-form-field>
-          <button mat-button (click)="addParticipant()">Add</button>
-
-          <!-- Displaying List of Participants with Owner Selection -->
-          <div *ngFor="let participant of participants; let i = index">
-            {{ participant.name }}
-            <mat-radio-group
-              aria-label="Select an owner"
-              formControlName="eventOwner"
-            >
-              <mat-radio-button [value]="participant.name"
-                >Owner</mat-radio-button
-              >
-            </mat-radio-group>
-          </div>
-
-          <button mat-button matStepperNext>Next</button>
-        </form>
-      </mat-step>
-
-      <!-- Step 3: Event Details -->
-      <mat-step
-        [stepControl]="eventDetailsFormGroup"
-        style="justify-content: center"
-      >
-        <form
-          [formGroup]="eventDetailsFormGroup"
-          class="stepper-form"
-          style="justify-content: center"
+      </div>
+    -->
+      <div style="display: flex; align-items: center; justify-content: center">
+        <button
+          mat-raised-button
+          (click)="submit()"
+          style="height: 5vh; width: 19vh"
+          class="submit-button"
         >
-          <ng-template matStepLabel>Event Details</ng-template>
-
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              [matDatepicker]="picker"
-              placeholder="Date of Gift Exchange"
-              formControlName="eventDate"
-              required
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="picker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-          <br />
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              placeholder="Location of the Event"
-              formControlName="eventLocation"
-              required
-            />
-          </mat-form-field>
-          <br />
-          <mat-form-field class="full-width">
-            <input
-              matInput
-              type="number"
-              placeholder="Dollar Amount Limit"
-              formControlName="dollarLimit"
-              required
-            />
-          </mat-form-field>
-
-          <button mat-button matStepperNext>Next</button>
-        </form>
-      </mat-step>
-
-      <!-- Step 4: Review and Submit -->
-      <mat-step>
-        <form class="stepper-form">
-          <ng-template matStepLabel>Review and Submit</ng-template>
-
-          <!-- Review Information -->
-          <h3>Review Your Information:</h3>
-          <p>
-            <b>Event Name:</b> {{ eventNameFormGroup.get("eventName")?.value }}
-          </p>
-          <p><b>Participants:</b> {{ participants | json }}</p>
-          <p>
-            <b>Date of Gift Exchange:</b>
-            {{ eventDetailsFormGroup.get("eventDate")?.value }}
-          </p>
-          <p>
-            <b>Location:</b>
-            {{ eventDetailsFormGroup.get("eventLocation")?.value }}
-          </p>
-          <p>
-            <b>Dollar Limit:</b>
-            {{ eventDetailsFormGroup.get("dollarLimit")?.value }}
-          </p>
-
-          <button mat-button (click)="submit()">Submit</button>
-
-        </form>
-      </mat-step>
-    </mat-horizontal-stepper>
+          Submit
+          <img
+            src="../../../assets/hat.png"
+            alt="Santa Hat"
+            class="hat-image"
+          />
+        </button>
+      </div>
+    </form>
 
     <div *ngIf="event">
       <h2>{{ event.eventName }}</h2>
@@ -242,12 +155,14 @@
           }}</a>
         </li>
       </ul>
+      <hr />
+      <h2>Qr Code For Sharing</h2>
       <qr-code
-            *ngIf="this.newId !== null"
-            value="{{ this.qrCodeUrl }}"
-            size="300"
-            errorCorrectionLevel="M"
-          ></qr-code>
+        *ngIf="this.event !== null"
+        value="{{ this.event.qrCodeUrl }}"
+        size="300"
+        errorCorrectionLevel="M"
+      ></qr-code>
     </div>
   </div>
 </div>

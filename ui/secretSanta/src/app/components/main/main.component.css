@@ -1,79 +1,86 @@
-/* Styles for the outer container */
 .outer-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
-  width: 100vh;
-  background-color: transparent;
-  border-radius: 10px;
+  justify-content: center;
+  padding: 3vh;
+  padding-left: 46vh;
+  padding-right: 46vh;
 }
 
 /* Styles for the inner container */
 .inner-container {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
-  padding: 20px;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
+
+  padding: 3vh;
+}
+
+.submit-button{
+  position: relative;
+  ;
+}
+
+.submit-button::after {
+  content: ''; /* Required for pseudo-elements */
+  position: absolute; /* Position relative to the button */
+  top: 0;
+  right: 0;
+  width: 25%; /* Adjust size as needed */
+  height: 25%; /* Adjust size as needed */
+  background: url('/path/to/hat.png') no-repeat; /* Use the correct path to your image */
+  background-size: contain; /* Make the image fit the container */
+  transform: translate(50%, -50%); /* Adjust the position to float over the corner */
+}
+
+.submit-button .hat-image {
+  position: absolute; /* Position relative to the button */
+  top: 0;
+  right: 0;
+  width: 55%; /* Adjust size as needed */
+  height: auto; /* Maintain aspect ratio */
+  transform: translate(280%, -110%);
+}
+
+.participant-section {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.add-participant-input {
+  flex-grow: 1;
+}
+
+.participants-list {
+  flex-grow: 1;
+  margin-left: 0; /* Adjust as necessary for spacing */
+  border-left: .5px solid rgb(146, 159, 168);
+  border-radius: 2px;
+  font-size: large;
+  padding: 5px;
+  margin:5px;
+}
+
+.participant-item {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
-/* Styles for each form group */
-.form-group {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 10px;
+.participant-name {
+  flex-grow: 1; /* Allows the name to take up as much space as possible */
 }
 
-.form-label {
-  margin-right: 10px;
+/* You may want to style the list as well */
+.participants-list ul {
+  list-style-type: none;
+  padding: 0;
 }
 
-.form-input {
-  flex-grow: 1; /* Allows input to take up remaining space */
-}
-
-.btn {
-  padding: 5px 10px;
-  margin-top: 10px;
-}
-
-/* Existing styles... */
-
-/* Ensuring stepper content is centered */
-.mat-horizontal-stepper-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Center children horizontally */
-  justify-content: center; /* Center children vertically */
-  width: 100%;
-  max-width: 600px;
-  margin: auto;
-  padding: 10vh;
-}
-
-/* Styles for form fields to ensure centered and one per line */
-.mat-form-field {
-  width: 100%; /* Take full width of its container */
-  max-width: 400px; /* Maximum width */
-  margin: 15px auto; /* Centered horizontally with margin auto */
-  display: block; /* Ensure it's a block level element */
-}
-
-/* Center align the buttons */
-button {
-  display: block;
-  margin: 20px auto;
-  padding: 10px 15px;
-}
-
-/* Additional styles for the form inside the stepper */
-.stepper-form {
-  width: 100%; /* Full width of stepper content */
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Center form elements horizontally */
+.participants-list li {
+  margin-bottom: 2px; /* Spacing between list items */
 }
