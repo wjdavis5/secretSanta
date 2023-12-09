@@ -22,9 +22,23 @@
 
 .submit-button{
   position: relative;
-  ;
+  height: 5vh;
+  width: 19vh
 }
-
+.form-section{
+  margin: 1vh;
+}
+.form-section mat-form-field {
+  width: 100%;
+}
+.form-section button {
+  margin: 1vh;
+}
+.submit-button-container{
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
 .submit-button::after {
   content: ''; /* Required for pseudo-elements */
   position: absolute; /* Position relative to the button */
@@ -63,7 +77,6 @@
   border-radius: 2px;
   font-size: large;
   padding: 5px;
-  margin:5px;
 }
 
 .participant-item {
@@ -93,9 +106,7 @@
     padding-right: 5vh;
   }
 
-  .inner-container {
-    /* ... (existing styles if needed) ... */
-  }
+
 
   .submit-button::after,
   .submit-button .hat-image {

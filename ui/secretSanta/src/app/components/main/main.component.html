@@ -5,7 +5,7 @@
     <form *ngIf="isNew()" [formGroup]="secretSantaFormGroup" class="unified-form">
       <!-- Event Name -->
       <div class="form-section">
-        <mat-form-field style="width: 100%">
+        <mat-form-field>
           <input
             matInput
             placeholder="Event Name"
@@ -29,8 +29,8 @@
           <button
             mat-raised-button
             (click)="addParticipant()"
-            style="margin: 1vh"
             color="accent"
+            type="button"
           >
             Add Participant
           </button>
@@ -52,6 +52,7 @@
                   (click)="removeParticipant(i)"
                   class="remove-button"
                   color="warn"
+                  type="button"
                 >
                   Remove
                 </button>
@@ -63,7 +64,7 @@
 
       <!-- Event Details -->
       <div class="form-section">
-        <mat-form-field style="width: 100%">
+        <mat-form-field>
           <input
             matInput
             [matDatepicker]="picker"
@@ -79,7 +80,7 @@
         </mat-form-field>
       </div>
       <div class="form-section">
-        <mat-form-field style="width: 100%">
+        <mat-form-field>
           <input
             matInput
             placeholder="Location of the Event"
@@ -89,7 +90,7 @@
         </mat-form-field>
       </div>
       <div class="form-section">
-        <mat-form-field style="width: 100%">
+        <mat-form-field>
           <input
             matInput
             type="number"
@@ -100,37 +101,13 @@
         </mat-form-field>
       </div>
 
-      <!-- Review and Submit Section
-      <div class="form-section">
-        <h3>Review Your Information:</h3>
-        <p>
-          <b>Event Name:</b> {{ secretSantaFormGroup.get("eventName")?.value }}
-        </p>
-        <p>
-          <b>Participants:</b>
-          {{ secretSantaFormGroup.get("participants")?.value | json }}
-        </p>
-        <p>
-          <b>Date of Gift Exchange:</b>
-          {{ secretSantaFormGroup.get("eventDate")?.value }}
-        </p>
-        <p>
-          <b>Location:</b>
-          {{ secretSantaFormGroup.get("eventLocation")?.value }}
-        </p>
-        <p>
-          <b>Dollar Limit:</b>
-          {{ secretSantaFormGroup.get("dollarLimit")?.value }}
-        </p>
 
-      </div>
-    -->
-      <div style="display: flex; align-items: center; justify-content: center">
+      <div class="submit-button-container">
         <button
           mat-raised-button
           (click)="submit()"
-          style="height: 5vh; width: 19vh"
           class="submit-button"
+          type="button"
         >
           Submit
           <img
