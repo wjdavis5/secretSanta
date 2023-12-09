@@ -1,3 +1,4 @@
+
 .outer-container {
   display: flex;
   flex-direction: column;
@@ -83,4 +84,44 @@
 
 .participants-list li {
   margin-bottom: 2px; /* Spacing between list items */
+}
+
+/* Responsive styles for mobile devices */
+@media (max-width: 768px) {
+  .outer-container {
+    padding-left: 5vh; /* Less padding on the sides for smaller screens */
+    padding-right: 5vh;
+  }
+
+  .inner-container {
+    /* ... (existing styles if needed) ... */
+  }
+
+  .submit-button::after,
+  .submit-button .hat-image {
+    width: 20%; /* Smaller hat image on mobile */
+    transform: translate(50%, -50%) rotate(20deg); /* Adjust translate values if necessary */
+  }
+
+  .participant-section {
+    flex-direction: column; /* Stack input and list on top of each other */
+  }
+
+  .add-participant-input,
+  .participants-list {
+    width: 100%; /* Full width on smaller screens */
+    margin-left: 0;
+  }
+
+  .participant-item {
+    flex-direction: row; /* Keep name and remove button in a row */
+  }
+
+  .participants-list ul {
+    padding: 0;
+  }
+
+  .participants-list li {
+    margin-bottom: 10px; /* Spacing between list items */
+  }
 }
