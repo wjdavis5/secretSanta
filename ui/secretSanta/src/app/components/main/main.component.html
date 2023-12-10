@@ -7,135 +7,160 @@
       <h2>Organize your Secret Santa event</h2>
     </div>
     <div class="login-button-container">
-      <span *ngIf="auth.user$ | async as user">Hello, {{ user.name }}</span>
-      <br/>
-      <button *ngIf="(auth.isAuthenticated$ | async) === false" mat-raised-button (click)="login()">
-        Login
-      </button>
-      <button *ngIf="(auth.isAuthenticated$ | async)" mat-raised-button (click)="logout()">
-        Logout
-      </button>
-
+      <ng-container
+        *ngIf="(auth.isAuthenticated$ | async) === false; else unAuthd"
+      >
+        <button mat-raised-button (click)="login()">Login</button>
+      </ng-container>
+      <ng-template #unAuthd>
+        <span *ngIf="auth.user$ | async as user">Hello, {{ user.name }}</span>
+        <br />
+        <button mat-raised-button (click)="logout()">Logout</button>
+      </ng-template>
     </div>
-    <form
-      *ngIf="isNew() && auth.user$"
-      [formGroup]="secretSantaFormGroup"
-      class="unified-form"
-    >
-      <!-- Event Name -->
-      <div class="form-section">
-        <mat-form-field>
-          <input
-            matInput
-            placeholder="Event Name"
-            formControlName="eventName"
-            required
-          />
-        </mat-form-field>
-      </div>
-
-      <!-- Add Participant -->
-      <div class="form-section participant-section">
-        <div class="add-participant-input">
-          <mat-form-field class="full-width">
+    <ng-container *ngIf="isNew() && (auth.isAuthenticated$ | async); else intro">
+      <form [formGroup]="secretSantaFormGroup" class="unified-form">
+        <!-- Event Name -->
+        <div class="form-section">
+          <mat-form-field>
             <input
               matInput
-              placeholder="Participant's Name"
-              formControlName="participantName"
+              placeholder="Event Name"
+              formControlName="eventName"
+              required
             />
           </mat-form-field>
-          <br />
+        </div>
+
+        <!-- Add Participant -->
+        <div class="form-section participant-section">
+          <div class="add-participant-input">
+            <mat-form-field class="full-width">
+              <input
+                matInput
+                placeholder="Participant's Name"
+                formControlName="participantName"
+              />
+            </mat-form-field>
+            <br />
+            <button
+              mat-raised-button
+              (click)="addParticipant()"
+              color="accent"
+              type="button"
+            >
+              Add Participant
+            </button>
+          </div>
+          <div class="participants-list">
+            <ul>
+              <li
+                *ngFor="
+                  let participantFormGroup of participantsFormArray.controls;
+                  let i = index
+                "
+              >
+                <div class="participant-item">
+                  <span class="participant-name">{{
+                    participantFormGroup.get("name")!.value
+                  }}</span>
+                  <button
+                    mat-button
+                    (click)="removeParticipant(i)"
+                    class="remove-button"
+                    color="warn"
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Event Details -->
+        <div class="form-section">
+          <mat-form-field>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              placeholder="Date of Gift Exchange"
+              formControlName="eventDate"
+              required
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="form-section">
+          <mat-form-field>
+            <input
+              matInput
+              placeholder="Location of the Event"
+              formControlName="eventLocation"
+              required
+            />
+          </mat-form-field>
+        </div>
+        <div class="form-section">
+          <mat-form-field>
+            <input
+              matInput
+              type="number"
+              placeholder="Dollar Amount Limit"
+              formControlName="dollarLimit"
+              required
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="submit-button-container">
           <button
             mat-raised-button
-            (click)="addParticipant()"
-            color="accent"
+            (click)="submit()"
+            class="submit-button"
             type="button"
           >
-            Add Participant
+            Submit
+            <img
+              src="../../../assets/hat.png"
+              alt="Santa Hat"
+              class="hat-image"
+            />
           </button>
         </div>
-        <div class="participants-list">
-          <ul>
-            <li
-              *ngFor="
-                let participantFormGroup of participantsFormArray.controls;
-                let i = index
-              "
-            >
-              <div class="participant-item">
-                <span class="participant-name">{{
-                  participantFormGroup.get("name")!.value
-                }}</span>
-                <button
-                  mat-button
-                  (click)="removeParticipant(i)"
-                  class="remove-button"
-                  color="warn"
-                  type="button"
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
+      </form>
+    </ng-container>
+    <ng-template #intro>
+      <div class="intro">
+        <h2>What is Secret Santa?</h2>
+        <p>
+          Secret Santa is a fun way to exchange gifts with a group of people.
+          Each person is assigned another person in the group to give a gift to.
+          The identity of the person you are giving a gift to is kept secret
+          until the gift exchange.
+        </p>
+        <h2>How does this app work?</h2>
+        <p>
+          This app allows you to create a Secret Santa event and invite your
+          friends to participate. Once everyone has joined, you can view the
+          event details and share the event with your friends. Each participant
+          will be able to see who they are giving a gift to, but no one else
+          will be able to see this information.
+        </p>
+        <h2>How do I get started?</h2>
+        <p>
+          Click the login button above to get started. Once you are logged in,
+          you will be able to create a new event. Once you have created an
+          event, you will be able to view the event details and share the event
+          with your friends.
+        </p>
       </div>
-
-      <!-- Event Details -->
-      <div class="form-section">
-        <mat-form-field>
-          <input
-            matInput
-            [matDatepicker]="picker"
-            placeholder="Date of Gift Exchange"
-            formControlName="eventDate"
-            required
-          />
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-      </div>
-      <div class="form-section">
-        <mat-form-field>
-          <input
-            matInput
-            placeholder="Location of the Event"
-            formControlName="eventLocation"
-            required
-          />
-        </mat-form-field>
-      </div>
-      <div class="form-section">
-        <mat-form-field>
-          <input
-            matInput
-            type="number"
-            placeholder="Dollar Amount Limit"
-            formControlName="dollarLimit"
-            required
-          />
-        </mat-form-field>
-      </div>
-
-      <div class="submit-button-container">
-        <button
-          mat-raised-button
-          (click)="submit()"
-          class="submit-button"
-          type="button"
-        >
-          Submit
-          <img
-            src="../../../assets/hat.png"
-            alt="Santa Hat"
-            class="hat-image"
-          />
-        </button>
-      </div>
-    </form>
+    </ng-template>
     <div *ngIf="auth.user$ && event">
       <h2>{{ event.eventName }}</h2>
       <p>Date: {{ event.eventDate }}</p>

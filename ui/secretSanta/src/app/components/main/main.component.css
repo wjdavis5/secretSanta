@@ -146,7 +146,20 @@
   margin-bottom: 2px;
   /* Spacing between list items */
 }
-
+.intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 1vh;
+}
+.intro h2 {
+  font-weight: bolder;
+}
+.intro p {
+  margin-left:2vw;
+  margin-right:2vw
+}
 /* Responsive styles for mobile devices */
 @media (max-width: 768px) {
   .outer-container {
