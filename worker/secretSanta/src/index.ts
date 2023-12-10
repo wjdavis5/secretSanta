@@ -27,15 +27,16 @@ app.use("*", async (c, next) => {
 });
 app.use("/api/v2/*", async (c, next) => {
   const jwksUrl = "https://secretsantaapp.us.auth0.com/.well-known/jwks.json";
-  let jawksCache = undefined;// c.env.SecretSanta.get<any>("jwks","json");
-  console.log(`jwksCache: ${JSON.stringify(jawksCache)}`);
-  if( !jawksCache ) {
+  c.env.SecretSanta.delete("jwks");
+  let jawksCache = await c.env.SecretSanta.get<any>("jwks","json");
+  console.debug(`jwksCache: ${JSON.stringify(jawksCache)}`);
+  if( !jawksCache || !jawksCache.keys || jawksCache.keys.length === 0 ) {
     const customerJwksResponse: Response = await fetch(jwksUrl);
-    console.log(`customerJwks: ${JSON.stringify(customerJwksResponse)}`);
+    console.debug(`customerJwks: ${JSON.stringify(customerJwksResponse)}`);
     const customerJwks: any = await customerJwksResponse.json();
-    console.log(`customerJwks: ${JSON.stringify(customerJwks)}`);
+    console.debug(`customerJwks: ${JSON.stringify(customerJwks)}`);
     await c.env.SecretSanta.put("jwks", JSON.stringify(customerJwks), { expirationTtl: 86400 });
-    console.log("set cache")
+    console.debug("set cache")
     jawksCache = customerJwks;
   }
     const jwks: any = jawksCache;
@@ -72,7 +73,7 @@ app.get("/api/secretSanta/:eventId", async (c) => {
     }
     participant.password = "";
   }
-  return c.json(existingEvent);
+  return c.json(JSON.stringify(existingEvent));
 });
 
 /* Create a new event
