@@ -1,0 +1,38 @@
+name: Build and Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - feature/*  # Set this to the branch you want to deploy from
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Pages
+    defaults:
+      run:
+        working-directory: ./ui/secretSanta
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'  # Set this to the Node version your project uses
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build Angular Project
+      run: npm run build -- --configuration=production --output-path ./deploy
+
+    - name: Publish to Cloudflare Pages
+      uses: cloudflare/pages-action@1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        projectName: secretsanta
+        directory: ./ui/secretSanta/deploy/browser
+

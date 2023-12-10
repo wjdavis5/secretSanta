@@ -9,6 +9,7 @@ import {
 } from '../../../../../../worker/secretSanta/src/types';
 import { environment } from '../../environments/environment';
 
+
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',

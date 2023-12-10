@@ -11,6 +11,7 @@ import { QrCodeModule } from 'ng-qrcode';
 import { ParticipantComponent } from './components/participant/participant.component';
 import { WishListComponent } from './components/wish-list/wish-list.component';
 import { NavigationEnd, Router } from '@angular/router';
+import { AuthModule } from '@auth0/auth0-angular';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,13 @@ import { NavigationEnd, Router } from '@angular/router';
     FormsModule,
     ReactiveFormsModule,
     QrCodeModule,
+    AuthModule.forRoot({
+      domain: 'secretsantaapp.us.auth0.com',
+      clientId: 'K2Jp3NvKHXNpMbcfJNpdPxeQ9MorcckQ',
+      authorizationParams: {
+        redirect_uri: window.location.origin
+      }
+    })
   ],
   providers: [],
   bootstrap: [AppComponent],
