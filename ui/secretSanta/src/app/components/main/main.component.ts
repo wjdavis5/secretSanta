@@ -8,7 +8,8 @@ import {
   SecretSantaParticipant,
 } from '../../../../../../worker/secretSanta/src/types';
 import { environment } from '../../environments/environment';
-
+import { AuthService } from '@auth0/auth0-angular';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main',
@@ -24,13 +25,15 @@ export class MainComponent implements OnInit {
   public participants: SecretSantaParticipant[] = [];
   public eventOwner: string = ''; // Store the selected event owner
   public event!: SecretSantaEvent;
+  user: import('@auth0/auth0-angular').User | null | undefined;
 
   constructor(
     private route: ActivatedRoute,
     private idService: NewIdService,
     private secretSantaService: SecretSantaService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    public auth: AuthService
   ) {
     this.secretSantaFormGroup = this.fb.group({
       eventName: ['', Validators.required],
@@ -40,6 +43,7 @@ export class MainComponent implements OnInit {
       eventLocation: ['', Validators.required],
       dollarLimit: ['', Validators.required],
     });
+    this.auth.handleRedirectCallback();
   }
   get participantsFormArray(): FormArray {
     return this.secretSantaFormGroup.get('participants') as FormArray;
@@ -53,6 +57,22 @@ export class MainComponent implements OnInit {
         this.getExistingEvent(eventId);
       }
     });
+    this.auth.error$.pipe(tap((error) => console.log(error)));
+    this.auth.isLoading$.pipe(tap((loading) => console.log(loading)));
+    this.auth.isAuthenticated$.subscribe({
+      next: (a) => {
+        console.log('isAuthenticated', a);
+      },
+      error: (err) => console.log(err),
+      complete: () => console.log('isAuthenticated complete'),
+    });
+    this.auth.user$.subscribe({
+      next: (user) => {
+        this.user = user;
+      },
+      error: (err) => console.log(err),
+    });
+
   }
 
   getExistingEvent(id: string) {
@@ -66,7 +86,8 @@ export class MainComponent implements OnInit {
   }
 
   addParticipant(): void {
-    const participantName = this.secretSantaFormGroup.get('participantName')!.value;
+    const participantName =
+      this.secretSantaFormGroup.get('participantName')!.value;
 
     const participantFormGroup = this.fb.group({
       name: [participantName, Validators.required],
@@ -108,11 +129,23 @@ export class MainComponent implements OnInit {
         console.log('Event Submitted:', this.event);
         this.router.navigate(['/main/' + event.id]);
         this.event = event;
-
       },
       error: (err) => {
         console.error('Error:', err);
       },
     });
+  }
+  login() {
+    this.auth.loginWithRedirect().subscribe({
+      next: (result) => {
+        console.log(result);
+        let x = this.auth.user$;
+      },
+      error: (err) => console.log(err),
+      complete: () => console.log('complete'),
+    });
+  }
+  logout() {
+    this.auth.logout({ logoutParams: { returnTo: document.location.origin } });
   }
 }

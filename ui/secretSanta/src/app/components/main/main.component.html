@@ -1,9 +1,27 @@
 <!-- Outer div with flex styling to center content -->
-
 <div class="outer-container">
   <!-- Inner div with form and styling -->
   <div class="inner-container">
-    <form *ngIf="isNew()" [formGroup]="secretSantaFormGroup" class="unified-form">
+    <div class="header">
+      <h1>Secret Santa</h1>
+      <h2>Organize your Secret Santa event</h2>
+    </div>
+    <div class="login-button-container">
+      <span *ngIf="auth.user$ | async as user">Hello, {{ user.name }}</span>
+      <br/>
+      <button *ngIf="(auth.isAuthenticated$ | async) === false" mat-raised-button (click)="login()">
+        Login
+      </button>
+      <button *ngIf="(auth.isAuthenticated$ | async)" mat-raised-button (click)="logout()">
+        Logout
+      </button>
+
+    </div>
+    <form
+      *ngIf="isNew() && auth.user$"
+      [formGroup]="secretSantaFormGroup"
+      class="unified-form"
+    >
       <!-- Event Name -->
       <div class="form-section">
         <mat-form-field>
@@ -102,7 +120,6 @@
         </mat-form-field>
       </div>
 
-
       <div class="submit-button-container">
         <button
           mat-raised-button
@@ -119,8 +136,7 @@
         </button>
       </div>
     </form>
-
-    <div *ngIf="event">
+    <div *ngIf="auth.user$ && event">
       <h2>{{ event.eventName }}</h2>
       <p>Date: {{ event.eventDate }}</p>
       <p>Location: {{ event.eventLocation }}</p>

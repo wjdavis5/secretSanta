@@ -8,16 +8,9 @@ import { AuthService } from '@auth0/auth0-angular';
 })
 export class AppComponent {
   title = 'secretSanta';
-  constructor(public auth: AuthService) { }
+  constructor(public auth: AuthService) {
 
-  login(){
-    this.auth.loginWithRedirect().subscribe({
-      next: (result) => {
-        console.log(result)
-        let x = this.auth.user$;
-      },
-      error: (err) => console.log(err),
-      complete: () => console.log('complete')
-    })
   }
+
+
 }

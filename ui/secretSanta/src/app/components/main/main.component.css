@@ -15,9 +15,41 @@
   border-color: black;
   border-width: 2px;
   border-style: solid;
-
-  padding: 3vh;
+  padding-bottom: 3vh;
+  position: relative;
 }
+
+.login-button-container {
+  position: absolute;
+  /* Position relative to inner-container */
+  top: 10px;
+  /* Adjust as needed */
+  right: 10px;
+  /* Adjust as needed */
+}
+
+.header {
+  text-align: center;
+  padding: 20px;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 9px;
+  background-color: rgb(126, 0, 0, .8);
+  /* Example background color */
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 2vh;
+}
+
+.header h1 {
+  margin: 0;
+  padding-bottom: 10px;
+  color: #fff;
+}
+
+.header h2 {
+  margin: 0;
+  color: #ffffffce;
+}
+
 
 .submit-button {
   position: relative;
@@ -54,7 +86,6 @@
   /* Adjust size as needed */
   height: 25%;
   /* Adjust size as needed */
-  background: url('/path/to/hat.png') no-repeat;
   /* Use the correct path to your image */
   background-size: contain;
   /* Make the image fit the container */
@@ -122,6 +153,22 @@
     padding-left: 5vh;
     /* Less padding on the sides for smaller screens */
     padding-right: 5vh;
+  }
+
+  .login-button-container {
+    position: static;
+    /* Resets to default positioning */
+    margin-top: 20px;
+    /* Adds some space above the button */
+    width: 100%;
+    /* Full width */
+    text-align: center;
+    /* Center the button */
+  }
+
+  .login-button-container button {
+    width: auto;
+    /* Adjust button width as needed */
   }
 
   .submit-button::after,

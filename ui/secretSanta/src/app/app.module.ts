@@ -12,6 +12,8 @@ import { ParticipantComponent } from './components/participant/participant.compo
 import { WishListComponent } from './components/wish-list/wish-list.component';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthModule } from '@auth0/auth0-angular';
+import { environment } from './environments/environment';
+import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +21,7 @@ import { AuthModule } from '@auth0/auth0-angular';
     MainComponent,
     ParticipantComponent,
     WishListComponent,
+    AuthCallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -30,10 +33,10 @@ import { AuthModule } from '@auth0/auth0-angular';
     ReactiveFormsModule,
     QrCodeModule,
     AuthModule.forRoot({
-      domain: 'secretsantaapp.us.auth0.com',
-      clientId: 'K2Jp3NvKHXNpMbcfJNpdPxeQ9MorcckQ',
+      domain: environment.auth0.domain,
+      clientId: environment.auth0.clientId,
       authorizationParams: {
-        redirect_uri: window.location.origin
+        redirect_uri: environment.auth0.redirectUri,
       }
     })
   ],
