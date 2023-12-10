@@ -9,7 +9,9 @@ export interface SecretSantaEvent {
   eventOwnerName: string;
 }
 
-
+export interface RequestState{
+  email: string;
+}
 
 export interface SecretSantaParticipant {
   name: string;

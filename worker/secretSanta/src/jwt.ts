@@ -36,18 +36,22 @@ export async function isValidJwt(request: any, jwks: any[], issuer: string, audi
     }
     return true;
   }
-  
+
+export async function getEmail(request: any){
+    const encodedToken = getJwt(request);
+    if (encodedToken === null) {
+      console.log("No token found");
+      return null;
+    }
+    const token = decodeJwt(encodedToken);
+    console.log(`Decoded token ${JSON.stringify(token)}`);
+    return token.payload.custom_email_claim;
+}
   function decodeJwt(token: any) {
     const parts = token.split(".");
-    console.debug("a");
-    console.debug("parts: " + JSON.stringify(parts));
     const header = JSON.parse(atob(parts[0]));
-    console.debug("header: " + JSON.stringify(header));
-    console.debug(parts[1].length);
     const payload = parts[1].length > 0 ? JSON.parse(atob(parts[1])): {};
-    console.debug("payload: " + JSON.stringify(payload));
     const signature = atob(parts[2].replace(/_/g, "/").replace(/-/g, "+"));
-    console.debug("signature: " + JSON.stringify(signature));
     return {
       header: header,
       payload: payload,
