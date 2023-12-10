@@ -5,13 +5,13 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularMaterialModule } from './angular-material/angular-material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MainComponent } from './components/main/main.component';
 import { QrCodeModule } from 'ng-qrcode';
 import { ParticipantComponent } from './components/participant/participant.component';
 import { WishListComponent } from './components/wish-list/wish-list.component';
 import { NavigationEnd, Router } from '@angular/router';
-import { AuthModule } from '@auth0/auth0-angular';
+import { AuthHttpInterceptor, AuthModule } from '@auth0/auth0-angular';
 import { environment } from './environments/environment';
 
 @NgModule({
@@ -35,10 +35,21 @@ import { environment } from './environments/environment';
       clientId: environment.auth0.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
+      },
+      httpInterceptor: {
+        allowedList: [{
+          uri: `${environment.apiUrl}api/v2/*`,
+          tokenOptions: {
+            authorizationParams:{
+            audience: "https://secretSanata.api/",
+          }},
+        }],
       }
     })
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {

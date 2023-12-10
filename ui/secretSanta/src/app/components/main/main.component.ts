@@ -72,7 +72,10 @@ export class MainComponent implements OnInit {
       },
       error: (err) => console.log(err),
     });
-
+    this.secretSantaService.getEventV2('test').subscribe({
+      next: (event) => { console.log(event);},
+      error: (err) => console.log(err),
+    });
   }
 
   getExistingEvent(id: string) {

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { jwt } from 'hono/jwt'
 import {
   SecretSantaEvent,
   SecretSantaParticipant,
@@ -9,10 +10,12 @@ import {
 import { generateAssignments } from "./methods";
 import { R2DataStore } from "./datalayer/R2DataStore";
 import { DataStore } from "./datalayer/DataStore";
+import { isValidJwt } from "./jwt";
 
 type Bindings = {
   SecretSantaBucket: R2Bucket;
   DataStore: DataStore;
+  SecretSanta: KVNamespace;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -22,7 +25,33 @@ app.use("*", async (c, next) => {
   c.env.DataStore = new R2DataStore(c.env.SecretSantaBucket);
   await next();
 });
-
+app.use("/api/v2/*", async (c, next) => {
+  const jwksUrl = "https://secretsantaapp.us.auth0.com/.well-known/jwks.json";
+  let jawksCache = undefined;// c.env.SecretSanta.get<any>("jwks","json");
+  console.log(`jwksCache: ${JSON.stringify(jawksCache)}`);
+  if( !jawksCache ) {
+    const customerJwksResponse: Response = await fetch(jwksUrl);
+    console.log(`customerJwks: ${JSON.stringify(customerJwksResponse)}`);
+    const customerJwks: any = await customerJwksResponse.json();
+    console.log(`customerJwks: ${JSON.stringify(customerJwks)}`);
+    await c.env.SecretSanta.put("jwks", JSON.stringify(customerJwks), { expirationTtl: 86400 });
+    console.log("set cache")
+    jawksCache = customerJwks;
+  }
+    const jwks: any = jawksCache;
+    console.log(`jwksKeys: ${JSON.stringify(jwks.keys)}`);
+    const isValid = await isValidJwt(c.req, jwks.keys, "https://secretsantaapp.us.auth0.com/", "https://secretSanata.api/");
+    const res = new Response("Unauthorized", {
+      status: 401,
+    });
+    if (!isValid) {
+      return res;
+    }
+  await next();
+});
+app.get("/api/v2/secretSanta/:eventId", async (c) => {
+  return c.text("ok");
+});
 app.get("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   const existingEvent: SecretSantaEvent = await c.env.DataStore.getEvent(eventId);
@@ -69,7 +98,7 @@ app.post("/api/secretSanta/:eventId", async (c) => {
   for (const assignment of assignments) {
     await c.env.DataStore.createParticipantAssignment(eventId, assignment);
   }
-  return c.json(eventObj);
+  return c.json(JSON.stringify(eventObj));
 });
 
 /* Get an existing participant for a given event

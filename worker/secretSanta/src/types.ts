@@ -27,3 +27,11 @@ export interface SecretSantaParticipantAssignment {
   participant: SecretSantaParticipant;
   assignment: SecretSantaParticipant;
 }
+
+export interface jwt {
+  aud: string;
+  iss: string;
+  iat: number;
+  nbf: number;
+  exp: number;
+}

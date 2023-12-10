@@ -23,6 +23,11 @@ export class SecretSantaService {
       `${this.baseUrl}api/secretSanta/${id}`
     );
   }
+  getEventV2(id: string): Observable<SecretSantaEvent> {
+    return this.httpClient.get<SecretSantaEvent>(
+      `${this.baseUrl}api/v2/secretSanta/${id}`
+    );
+  }
   addEvent(event: SecretSantaEvent): Observable<SecretSantaEvent> {
     return this.httpClient.post<SecretSantaEvent>(
       `${this.baseUrl}api/secretSanta/${event.id}`,
