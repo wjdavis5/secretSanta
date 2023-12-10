@@ -7,31 +7,32 @@ import {
   WishListEntry,
 } from "./types";
 import { generateAssignments } from "./methods";
-import { R2DataStore } from "./datalyer/types";
+import { R2DataStore } from "./datalayer/R2DataStore";
+import { DataStore } from "./datalayer/DataStore";
 
 type Bindings = {
   SecretSantaBucket: R2Bucket;
+  DataStore: DataStore;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
-let ds: R2DataStore;
 
 app.use("*", cors());
 app.use("*", async (c, next) => {
-  ds = new R2DataStore(c.env.SecretSantaBucket);
+  c.env.DataStore = new R2DataStore(c.env.SecretSantaBucket);
   await next();
 });
 
 app.get("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
-  const existingEvent: SecretSantaEvent = await ds.getEvent(eventId);
+  const existingEvent: SecretSantaEvent = await c.env.DataStore.getEvent(eventId);
   if (!existingEvent) {
     return new Response("Event not found", {
       status: 404,
     });
   }
   for (const participant of existingEvent.participants) {
-    const participantObj: SecretSantaParticipant = await ds.getParticipant(
+    const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(
       eventId,
       participant.name
     );
@@ -52,21 +53,21 @@ app.post("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   console.log(`Creating event ${eventId}`);
   const eventObj: SecretSantaEvent = await c.req.json();
-  const existingEvent = await ds.getEvent(eventId);
+  const existingEvent = await c.env.DataStore.getEvent(eventId);
   if (existingEvent) {
     return new Response("Cannot overwrite duplicate event", {
       status: 400,
     });
   }
-  await ds.createEvent(eventObj);
+  await c.env.DataStore.createEvent(eventObj);
   for (const participant of eventObj.participants) {
     participant.password = "";
-    await ds.createParticipant(eventId, participant);
+    await c.env.DataStore.createParticipant(eventId, participant);
   }
   const assignments = generateAssignments(eventObj);
   console.log(assignments);
   for (const assignment of assignments) {
-    await ds.createParticipantAssignment(eventId, assignment);
+    await c.env.DataStore.createParticipantAssignment(eventId, assignment);
   }
   return c.json(eventObj);
 });
@@ -79,7 +80,7 @@ app.post("/api/secretSanta/:eventId", async (c) => {
 app.get("/api/secretSanta/:eventId/:participantName", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+  const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(
     eventId,
     participantName
   );
@@ -99,7 +100,7 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
   const xParticipantPassword = c.req.header("x-participant-password");
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+  const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(
     eventId,
     participantName
   );
@@ -114,7 +115,7 @@ app.get("/api/secretSanta/:eventId/:participantName/assignment", async (c) => {
     });
   }
 
-  let thisAssignment = await ds.getParticipantAssignment(
+  let thisAssignment = await c.env.DataStore.getParticipantAssignment(
     eventId,
     participantName
   );
@@ -139,7 +140,7 @@ app.put("/api/secretSanta/:eventId/:participantName/password", async (c) => {
     });
   }
 
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(
+  const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(
     eventId,
     participantName
   );
@@ -156,7 +157,7 @@ app.put("/api/secretSanta/:eventId/:participantName/password", async (c) => {
   participantObj.password = password;
   participantObj.passwordIsSet = true;
   console.log(participantObj);
-  await ds.createParticipant(eventId, participantObj);
+  await c.env.DataStore.createParticipant(eventId, participantObj);
   console.log("password set");
   const res = { message: "Password set" };
   return c.json(res);
@@ -166,7 +167,7 @@ app.post("/api/secretSanta/:eventId/:participantName/login", async (c) => {
   const eventId = c.req.param("eventId");
   const participantName = c.req.param("participantName");
 
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId, participantName);
+  const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(eventId, participantName);
 
   if (!participantObj) {
     return new Response("Participant not foundd", {
@@ -191,7 +192,7 @@ app.put("/api/secretSanta/:eventId/:participantName/wishList", async (c) => {
   const participantName = c.req.param("participantName");
   const xParticipantPassword = c.req.header("x-participant-password");
 
-  const participantObj: SecretSantaParticipant = await ds.getParticipant(eventId, participantName);
+  const participantObj: SecretSantaParticipant = await c.env.DataStore.getParticipant(eventId, participantName);
 
   if (!participantObj) {
     return new Response("Participant not found", {
@@ -205,7 +206,7 @@ app.put("/api/secretSanta/:eventId/:participantName/wishList", async (c) => {
   }
   const wishlist: WishListEntry[] = await c.req.json();
   participantObj.wishlist = wishlist;
-  await ds.createParticipant(eventId, participantObj);
+  await c.env.DataStore.createParticipant(eventId, participantObj);
   const res = { message: "Wishlist updated" };
   return c.json(res);
 });
