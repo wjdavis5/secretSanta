@@ -13,7 +13,6 @@ import { WishListComponent } from './components/wish-list/wish-list.component';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthModule } from '@auth0/auth0-angular';
 import { environment } from './environments/environment';
-import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +20,6 @@ import { AuthCallbackComponent } from './components/auth-callback/auth-callback.
     MainComponent,
     ParticipantComponent,
     WishListComponent,
-    AuthCallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,7 +34,7 @@ import { AuthCallbackComponent } from './components/auth-callback/auth-callback.
       domain: environment.auth0.domain,
       clientId: environment.auth0.clientId,
       authorizationParams: {
-        redirect_uri: environment.auth0.redirectUri,
+        redirect_uri: window.location.origin,
       }
     })
   ],
