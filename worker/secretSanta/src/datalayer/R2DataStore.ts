@@ -1,5 +1,5 @@
 import {
-  SecretSantaEvent,
+  SecretSantaEventV1,
   SecretSantaParticipant,
   SecretSantaParticipantAssignment,
 } from "../types";
@@ -8,11 +8,11 @@ import { DataStore } from "./DataStore";
 export class R2DataStore implements DataStore {
   constructor(private bucket: R2Bucket) {}
 
-  async getEvent(eventId: string): Promise<SecretSantaEvent> {
-    return (await (await this.bucket.get(eventId))?.json()) as SecretSantaEvent;
+  async getEvent(eventId: string): Promise<SecretSantaEventV1> {
+    return (await (await this.bucket.get(eventId))?.json()) as SecretSantaEventV1;
   }
 
-  async createEvent(event: SecretSantaEvent): Promise<SecretSantaEvent> {
+  async createEvent(event: SecretSantaEventV1): Promise<SecretSantaEventV1> {
     await this.bucket.put(event.id, JSON.stringify(event));
     return event;
   }

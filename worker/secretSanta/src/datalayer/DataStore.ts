@@ -1,13 +1,14 @@
 import {
-  SecretSantaEvent,
+  SecretSantaEventV1,
+  SecretSantaEventV2,
   SecretSantaParticipant,
   SecretSantaParticipantAssignment
 } from "../types";
 
 
-export interface DataStore {
-  getEvent(eventId: string): Promise<SecretSantaEvent>;
-  createEvent(event: SecretSantaEvent): Promise<SecretSantaEvent>;
+export interface DataStore<T> {
+  getEvent<T>(eventId: string): Promise<T>;
+  createEvent(event: SecretSantaEventV1): Promise<SecretSantaEventV1 | SecretSantaEventV2>;
   getParticipant(
     eventId: string,
     participantName: string

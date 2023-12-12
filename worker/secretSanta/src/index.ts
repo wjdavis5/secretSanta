@@ -4,6 +4,8 @@ import { jwt } from 'hono/jwt'
 import {
   RequestState,
   SecretSantaEvent,
+  SecretSantaEventV1,
+  SecretSantaEventV2,
   SecretSantaParticipant,
   SecretSantaParticipantAssignment,
   WishListEntry,
@@ -20,6 +22,7 @@ type Bindings = {
   RequestState: RequestState;
 };
 
+
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", cors());
@@ -32,7 +35,7 @@ app.use("/api/v2/*", async (c, next) => {
   c.env.SecretSanta.delete("jwks");
   let jawksCache = await c.env.SecretSanta.get<any>("jwks","json");
   console.debug(`jwksCache: ${JSON.stringify(jawksCache)}`);
-  if( !jawksCache || !jawksCache.keys || jawksCache.keys.length === 0 ) {
+  if( !jawksCache?.keys || jawksCache.keys.length === 0 ) {
     const customerJwksResponse: Response = await fetch(jwksUrl);
     console.debug(`customerJwks: ${JSON.stringify(customerJwksResponse)}`);
     const customerJwks: any = await customerJwksResponse.json();
@@ -53,12 +56,13 @@ app.use("/api/v2/*", async (c, next) => {
     c.env.RequestState = {
       email: await getEmail(c.req),
     }
+    c.req.setParams({email: c.env.RequestState.email});
   await next();
 });
 app.get("/api/v2/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   const email = c.env.RequestState.email;
-  const existingEvent: SecretSantaEvent = await c.env.DataStore.getEvent(`${email}:${eventId}`);
+  const existingEvent: SecretSantaEventV1 = await c.env.DataStore.getEvent(`${email}:${eventId}`);
   if (!existingEvent) {
     return new Response("Event not found", {
       status: 404,
@@ -107,7 +111,7 @@ app.get("/api/secretSanta/:eventId", async (c) => {
 app.post("/api/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   console.log(`Creating event ${eventId}`);
-  const eventObj: SecretSantaEvent = await c.req.json();
+  const eventObj: SecretSantaEventV1 = await c.req.json();
   const existingEvent = await c.env.DataStore.getEvent(eventId);
   if (existingEvent) {
     return new Response("Cannot overwrite duplicate event", {

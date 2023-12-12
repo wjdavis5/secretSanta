@@ -1,4 +1,4 @@
-export interface SecretSantaEvent {
+export interface SecretSantaEventV1 {
   id: string;
   eventName: string;
   participants: SecretSantaParticipant[];
@@ -7,6 +7,15 @@ export interface SecretSantaEvent {
   dollarLimit: number;
   qrCodeUrl: string;
   eventOwnerName: string;
+}
+export interface SecretSantaEventV2 {
+  id: number;
+  shortCode: string,
+  name: string,
+  date: Date | string,
+  location: string,
+  spendLimit: number,
+  ownerId: number,
 }
 
 export interface RequestState{
