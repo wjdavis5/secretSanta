@@ -6,17 +6,17 @@ import {
 } from "../types";
 
 
-export interface DataStore<T> {
-  getEvent<T>(eventId: string): Promise<T>;
-  createEvent(event: SecretSantaEventV1): Promise<SecretSantaEventV1 | SecretSantaEventV2>;
+export interface DataStore {
+  getEvent(eventId: string, email: string): Promise<SecretSantaEventV2>;
+  createEvent(event: SecretSantaEventV2): Promise<SecretSantaEventV2>;
   getParticipant(
     eventId: string,
     participantName: string
-  ): Promise<SecretSantaParticipant>;
+  ): Promise<boolean>;
   createParticipant(
-    eventId: string,
-    participant: SecretSantaParticipant
-  ): Promise<SecretSantaParticipant>;
+    event: SecretSantaEventV2,
+    email: string
+  ): Promise<boolean>;
   getParticipantAssignment(
     eventId: string,
     participantName: string

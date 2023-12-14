@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NewIdService } from '../../services/new-id.service';
 import { SecretSantaService } from '../../services/secret-santa.service';
 import {
-  SecretSantaEvent,
+  SecretSantaEventV1,
   SecretSantaParticipant,
 } from '../../../../../../worker/secretSanta/src/types';
 import { environment } from '../../environments/environment';
@@ -24,7 +24,7 @@ export class MainComponent implements OnInit {
   public secretSantaFormGroup: FormGroup; // Single form group for the new form
   public participants: SecretSantaParticipant[] = [];
   public eventOwner: string = ''; // Store the selected event owner
-  public event!: SecretSantaEvent;
+  public event!: SecretSantaEventV1;
   user: import('@auth0/auth0-angular').User | null | undefined;
 
   constructor(

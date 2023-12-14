@@ -1,3 +1,17 @@
+-- Delete all records from tables
+DELETE FROM userWishlist;
+DELETE FROM eventParticipants;
+DELETE FROM Events;
+DELETE FROM Users;
+
+-- Drop tables
+DROP TABLE IF EXISTS userWishlist;
+DROP TABLE IF EXISTS eventParticipants;
+DROP TABLE IF EXISTS Events;
+DROP TABLE IF EXISTS Users;
+
+
+drop table if exists Users;
 CREATE TABLE 
 IF NOT EXISTS
 Users (
@@ -5,6 +19,7 @@ Users (
     Email  TEXT    UNIQUE,
     github TEXT
 );
+drop table if exists Events;
 CREATE TABLE 
 IF NOT EXISTS
 Events (
@@ -16,15 +31,15 @@ Events (
     spendLimit INTEGER NOT NULL,
     ownerId    INTEGER REFERENCES Users (id) 
 );
+Drop table if exists eventParticipants;
 CREATE TABLE 
 IF NOT EXISTS
 eventParticipants (
     eventId INTEGER REFERENCES Events (id) 
                     NOT NULL,
-    userId  INTEGER REFERENCES Users (id) 
-                    NOT NULL,
-    id      INTEGER PRIMARY KEY AUTOINCREMENT
+    email   TEXT    NOT NULL
 );
+Drop table if exists userWishlist;
 CREATE TABLE
 IF NOT EXISTS
 userWishlist (

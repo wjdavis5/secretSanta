@@ -3,7 +3,6 @@ import { cors } from "hono/cors";
 import { jwt } from 'hono/jwt'
 import {
   RequestState,
-  SecretSantaEvent,
   SecretSantaEventV1,
   SecretSantaEventV2,
   SecretSantaParticipant,
@@ -56,13 +55,13 @@ app.use("/api/v2/*", async (c, next) => {
     c.env.RequestState = {
       email: await getEmail(c.req),
     }
-    c.req.setParams({email: c.env.RequestState.email});
+    
   await next();
 });
 app.get("/api/v2/secretSanta/:eventId", async (c) => {
   const eventId = c.req.param("eventId");
   const email = c.env.RequestState.email;
-  const existingEvent: SecretSantaEventV1 = await c.env.DataStore.getEvent(`${email}:${eventId}`);
+  const existingEvent: SecretSantaEventV2 = await c.env.DataStore.getEvent(eventId, email);
   if (!existingEvent) {
     return new Response("Event not found", {
       status: 404,

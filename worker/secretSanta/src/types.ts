@@ -13,12 +13,33 @@ export interface SecretSantaEventV2 {
   shortCode: string,
   name: string,
   date: Date | string,
+  participants: string[]
   location: string,
   spendLimit: number,
   ownerId: number,
 }
 
-export interface RequestState{
+export interface User {
+  id: number;
+  email: string;
+  github: string;
+}
+export interface Event {
+  id: number;
+  shortCode: string;
+  name: string;
+  date: string;
+  location: string;
+  spendLimit: number;
+  ownerId: number;
+}
+export interface EventParticipant {
+  id: number;
+  eventId: number;
+  email: string;
+}
+
+export interface RequestState {
   email: string;
 }
 

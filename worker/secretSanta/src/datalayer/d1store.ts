@@ -1,39 +1,53 @@
-import { SecretSantaEventV1, SecretSantaParticipant, SecretSantaParticipantAssignment } from "../types";
+import { SecretSantaEventV1, SecretSantaEventV2, SecretSantaParticipant, SecretSantaParticipantAssignment } from "../types";
 import { DataStore } from "./DataStore";
 
 export class d1store implements DataStore {
     
     constructor(private d1: D1Database) {}
-    async getEvent(eventId: string): Promise<SecretSantaEventV1> {
-        const results = await this.d1.prepare("SELECT * FROM events WHERE shortCode = ?").bind(eventId).all();
+    async getEvent(eventId: string, email: string): Promise<SecretSantaEventV2> {
+        const query = `
+        SELECT e.*, up.id as participantId, up.Email as participantEmail
+        FROM Events e
+        JOIN Users u ON e.ownerId = u.id
+        LEFT JOIN eventParticipants ep ON e.id = ep.eventId
+        LEFT JOIN Users up ON ep.userId = up.id
+        WHERE e.shortCode = ?
+        AND (u.Email = ? OR EXISTS (
+            SELECT 1 
+            FROM eventParticipants ep2 
+            JOIN Users u2 ON ep2.userId = u2.id 
+            WHERE ep2.eventId = e.id AND u2.Email = ?)
+        )
+        `
+        const results = await this.d1.prepare(query).bind(eventId,email,email).all();
         if (results.error) {
             throw new Error(results.error);
         }
         console.debug(`Results: ${JSON.stringify(results)}`) ;       
         const topResult = results.results[0];
-        const event :SecretSantaEventV1 = {
-            dollarLimit: 0,
-            eventDate: new Date(),
-            eventLocation: "",
-            eventName: "",
-            eventOwnerName: "",
-            id: "",
-            participants: [],
-            qrCodeUrl: ""
-        }
+        const event :any  = topResult;
         return event;
     }
 
-    createEvent(event: SecretSantaEventV1): Promise<SecretSantaEventV1> {
+    createEvent(event: SecretSantaEventV2): Promise<SecretSantaEventV2> {
+        for(const participant of event.participants) {
+            this.createParticipant(event.shortCode, participant);
+        }
+    }
+
+    getParticipant(eventId: string, participantName: string): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
 
-    getParticipant(eventId: string, participantName: string): Promise<SecretSantaParticipant> {
-        throw new Error("Method not implemented.");
-    }
-
-    createParticipant(eventId: string, participant: SecretSantaParticipant): Promise<SecretSantaParticipant> {
-        throw new Error("Method not implemented.");
+    async createParticipant(event: SecretSantaEventV2, email: string): Promise<boolean> {
+        const query = `
+        INSERT INTO eventParticipants (eventId,email) VALUES (?,?)`
+        const results = await this.d1.prepare(query).bind(event.id,email).run();
+        console.debug(`Results: ${JSON.stringify(results)}`) ;
+        if (results?.error) {
+            throw new Error(results.error);
+        }
+        return true;
     }
 
     getParticipantAssignment(eventId: string, participantName: string): Promise<SecretSantaParticipantAssignment | undefined> {

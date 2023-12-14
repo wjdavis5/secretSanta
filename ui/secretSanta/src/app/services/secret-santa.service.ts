@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import {
-  SecretSantaEvent,
+  SecretSantaEventV1,
   SecretSantaParticipant,
   WishListEntry,
 } from '../../../../../worker/secretSanta/src/types';
@@ -18,18 +18,18 @@ export class SecretSantaService {
     this.baseUrl = environment.apiUrl;
   }
 
-  getEvent(id: string): Observable<SecretSantaEvent> {
-    return this.httpClient.get<SecretSantaEvent>(
+  getEvent(id: string): Observable<SecretSantaEventV1> {
+    return this.httpClient.get<SecretSantaEventV1>(
       `${this.baseUrl}api/secretSanta/${id}`
     );
   }
-  getEventV2(id: string): Observable<SecretSantaEvent> {
-    return this.httpClient.get<SecretSantaEvent>(
+  getEventV2(id: string): Observable<SecretSantaEventV1> {
+    return this.httpClient.get<SecretSantaEventV1>(
       `${this.baseUrl}api/v2/secretSanta/${id}`
     );
   }
-  addEvent(event: SecretSantaEvent): Observable<SecretSantaEvent> {
-    return this.httpClient.post<SecretSantaEvent>(
+  addEvent(event: SecretSantaEventV1): Observable<SecretSantaEventV1> {
+    return this.httpClient.post<SecretSantaEventV1>(
       `${this.baseUrl}api/secretSanta/${event.id}`,
       event
     );
